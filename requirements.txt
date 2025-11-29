@@ -5,7 +5,7 @@ whitenoise==6.11.0
 pymysql==1.1.0
 psycopg2-binary==2.9.9
 packaging==25.0
-Pillow==10.2.0
+Pillow==9.5.0
 xhtml2pdf==0.2.11
 dj-database-url==2.1.0
 
