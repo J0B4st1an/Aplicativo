@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ vehiculo.marca }} {{ vehiculo.modelo }} - Reserva</title>
+    <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
+</head>
+
+<body>
+
+<header>
+    <nav>
+        <div class="logo">
+            <a href="{% url 'home' %}">
+                <img src="{% static 'img/LogoClickCar.png' %}" alt="Logo">
+            </a>
+        </div>
+
+        <ul class="menu">
+            <li><a href="{% url 'home' %}">Inicio</a></li>
+            <li><a href="{% url 'products' %}">Vehiculos</a></li>
+
+            {% if request.session.usuario_rol == "admin" %}
+                <li><a href="{% url 'visualizar_perfiles' %}">Administracion</a></li>
+            {% endif %}
+
+            {% if request.session.usuario_id %}
+                <li><a href="{% url 'exit' %}">Salir</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Ingresar</a></li>
+                <li><a href="{% url 'registro' %}">Registrarse</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
+
+<!-- MENSAJES SOLO PARA LA PÁGINA DE RESERVA -->
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+        {% if 'reserva' in message.tags %}
+            <div class="msg {{ message.tags }}">{{ message }}</div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<section class="reserva-new">
+
+    <!--FOTO DEL VEHÍCULO -->
+    <div class="reserva-img">
+        {% if vehiculo.foto %}
+            <img src="{{ vehiculo.foto.url }}" 
+                 alt="{{ vehiculo.marca }}"
+                 style="width: 260px; height:160px; object-fit:cover; border-radius:12px;">
+        {% else %}
+            <img src="{% static 'img/car_default.png' %}"
+                 alt="Sin imagen"
+                 style="width: 260px; height:160px; object-fit:cover; opacity:0.6; border-radius:12px;">
+        {% endif %}
+    </div>
+
+    <h2 class="reserva-title">{{ vehiculo.marca }} {{ vehiculo.modelo }}</h2>
+
+    <p class="reserva-price">
+        ${{ vehiculo.precio_dia|floatformat:0 }} <span>/ día</span>
+    </p>
+
+    <!-- FORMULARIO -->
+    <form method="POST" class="reserva-form-new">
+        {% csrf_token %}
+        <div class="date-container">
+
+            <div class="date-box">
+                <label>Desde:</label>
+                <input type="date" name="fecha_inicio" min="{{ hoy }}" required>
+            </div>
+
+            <div class="date-box">
+                <label>Hasta:</label>
+                <input type="date" name="fecha_fin" min="{{ hoy }}" required>
+            </div>
+
+        </div>
+        <button type="submit" class="btn-reservar-new">Continuar</button>
+    </form>
+
+    <div class="reserva-info-grid">
+        <div class="info-box">Modelo<br><span>{{ vehiculo.modelo }}</span></div>
+        <div class="info-box">Asientos<br><span>{{ vehiculo.asientos }}</span></div>
+        <div class="info-box">Combustible<br><span>{{ vehiculo.combustible }}</span></div>
+    </div>
+
+    <div class="descripcion-box">
+        <h4>Descripción</h4>
+        <p>{{ vehiculo.descripcion|default:"Sin descripción disponible." }}</p>
+    </div>
+
+</section>
+
+</body>
+</html>
