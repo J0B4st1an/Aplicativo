@@ -1,18 +1,24 @@
 import os
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ===========================
+# SECURITY + DEBUG
+# ===========================
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
 
-DEBUG = os.environ.get('RENDER') is None
+DEBUG = os.environ.get('RENDER') is None   # Local = True, Render = False
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
-
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
+# ===========================
+# APPS
+# ===========================
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -23,6 +29,9 @@ INSTALLED_APPS = [
     'core',
 ]
 
+# ===========================
+# MIDDLEWARE
+# ===========================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -36,6 +45,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'ClickCar.urls'
 
+# ===========================
+# TEMPLATES
+# ===========================
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -53,7 +65,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'ClickCar.wsgi.application'
 
+
+# ===========================
+# DATABASES
+# ===========================
+
 if DEBUG:
+    # ---- BASE DE DATOS LOCAL (MySQL) ----
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
@@ -68,17 +86,17 @@ if DEBUG:
         }
     }
 else:
+    # ---- BASE DE DATOS PRODUCCIÓN (Render - PostgreSQL) ----
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': os.environ.get('PGDATABASE'),
-            'USER': os.environ.get('PGUSER'),
-            'PASSWORD': os.environ.get('PGPASSWORD'),
-            'HOST': os.environ.get('PGHOST'),
-            'PORT': os.environ.get('PGPORT'),
-        }
+        'default': dj_database_url.config(
+            default=os.environ.get("DATABASE_URL"),
+            conn_max_age=600
+        )
     }
 
+# ===========================
+# PASSWORDS
+# ===========================
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -86,19 +104,17 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
+# ===========================
+# INTERNATIONALIZATION
+# ===========================
 LANGUAGE_CODE = 'es'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-LOGIN_REDIRECT_URL = 'home'
-LOGOUT_REDIRECT_URL = 'home'
-
+# ===========================
+# STATIC & MEDIA FILES
+# ===========================
 STATIC_URL = '/static/'
 
 if not DEBUG:
@@ -110,6 +126,15 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# ===========================
+# LOGIN / LOGOUT
+# ===========================
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
+
+# ===========================
+# EMAIL SMTP
+# ===========================
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
